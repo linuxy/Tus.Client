@@ -31,7 +31,7 @@ client.EnableResuming(urlStore);
 // Upload a file with progress tracking
 var progress = new Progress<double>(p => Console.WriteLine($"Upload progress: {p:P2}"));
 var filePath = "example.txt";
-var fingerprint = filePath; // In a real app, you would compute a hash of the file
+var fingerprint = GetFingerprint(filePath);
 
 try
 {
