@@ -34,7 +34,6 @@ public class TusClient : IDisposable
         _httpClient = httpClient ?? new HttpClient();
         _httpClient.BaseAddress = new Uri(baseUrl.TrimEnd('/') + "/");
         _httpClient.DefaultRequestHeaders.Add("Tus-Resumable", "1.0.0");
-        _httpClient.DefaultRequestHeaders.Add("Tus-Version", "1.0.0");
 
         _jsonOptions = new JsonSerializerOptions
         {
@@ -97,6 +96,7 @@ public class TusClient : IDisposable
     public async Task<UploadInfo> CreateUploadAsync(long fileSize, Dictionary<string, string>? metadata = null)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, "files");
+
         request.Headers.Add("Upload-Length", fileSize.ToString());
 
         if (metadata != null)
@@ -109,7 +109,8 @@ public class TusClient : IDisposable
         
         if (!response.IsSuccessStatusCode)
         {
-            throw new ProtocolException($"Unexpected status code ({response.StatusCode}) while creating upload", response);
+            var errMessage = await response.Content.ReadAsStringAsync();
+            throw new ProtocolException($"Unexpected status code ({response.StatusCode}) while creating upload: {errMessage}", response);
         }
 
         var uploadUrl = response.Headers.Location?.ToString();
